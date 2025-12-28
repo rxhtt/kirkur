@@ -1,7 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatSession, Message, ModelType } from '../types';
-import { v4 as uuidv4 } from 'uuid';
 import { MessageItem } from './MessageItem';
 
 interface ChatWindowProps {
@@ -77,7 +76,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     abortControllerRef.current = new AbortController();
 
     const userMsg: Message = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       role: 'user',
       content: input || (attachedFile ? `Mission data attached: ${attachedFile.name}` : ""),
       timestamp: Date.now(),
@@ -113,7 +112,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
       const data = await response.json();
       onUpdateMessages([...newMessages, {
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         role: 'assistant',
         content: data.text,
         timestamp: Date.now()
@@ -128,8 +127,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   };
 
   const models = [
+    { id: ModelType.FLASH, label: 'Cortex Lite', desc: 'Standard Uplink' },
     { id: ModelType.PRO, label: 'Apex Pro', desc: 'Superior Intelligence' },
-    { id: ModelType.FLASH, label: 'Cortex Lite', desc: 'Agile & Fast' },
     { id: ModelType.YOUTUBE, label: 'YT Recon', desc: 'Media Analysis' },
     { id: ModelType.WEATHER, label: 'Sat Weather', desc: 'Meteorological' },
     { id: ModelType.EXA, label: 'Exa Neural', desc: 'Web Context' },
@@ -141,7 +140,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const currentModelLabel = models.find(m => m.id === activeModel)?.label || "Select Model";
 
   return (
-    <div className="flex-1 flex flex-col relative h-full">
+    <div className="flex-1 flex flex-col relative h-full bg-black">
       <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar pb-40 pt-12 px-4 md:px-6">
         <div className="max-w-3xl mx-auto space-y-12">
           {session.messages.length === 0 ? (
@@ -179,7 +178,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
       <div className="absolute bottom-0 inset-x-0 p-4 md:p-8 z-50">
         <div className="max-w-3xl mx-auto relative">
-          
           {showModelMenu && (
             <div className="absolute bottom-full left-0 right-0 mb-6 glass rounded-[2.5rem] border border-white/10 p-3 shadow-4xl animate-in slide-in-from-bottom-8 duration-300 overflow-hidden">
               <div className="px-6 py-4 border-b border-white/5">
@@ -206,7 +204,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           <div className="p-2 glass rounded-[2.5rem] border border-white/10 shadow-4xl flex items-center gap-2">
             <button 
               onClick={() => setShowModelMenu(!showModelMenu)}
-              className="px-5 py-4 bg-white/5 border border-white/5 hover:bg-white/10 text-[9px] font-black text-white/60 hover:text-white rounded-[1.8rem] transition-all uppercase tracking-[0.2em] shrink-0"
+              className="px-4 md:px-5 py-4 bg-white/5 border border-white/5 hover:bg-white/10 text-[9px] font-black text-white/60 hover:text-white rounded-[1.8rem] transition-all uppercase tracking-[0.2em] shrink-0"
             >
               {currentModelLabel}
             </button>
@@ -226,7 +224,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             <div className="flex items-center gap-1 shrink-0 pr-1">
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="p-3 text-white/30 hover:text-white transition-all rounded-full"
+                className="p-3 text-white/30 hover:text-white transition-all rounded-full hidden sm:block"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
               </button>
@@ -238,22 +236,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
               </button>
 
-              {isLoading ? (
-                <button 
-                  onClick={stopGeneration}
-                  className="w-11 h-11 flex items-center justify-center bg-red-600 text-white rounded-full shadow-2xl active:scale-90 transition-all"
-                >
-                  <div className="w-3.5 h-3.5 bg-white rounded-sm"></div>
-                </button>
-              ) : (
-                <button 
-                  onClick={handleSendMessage}
-                  className="w-11 h-11 flex items-center justify-center bg-white text-black disabled:opacity-10 active:scale-95 transition-all shadow-2xl rounded-full"
-                  disabled={(!input.trim() && !attachedFile)}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-              )}
+              <div className="w-11 h-11 flex-shrink-0">
+                {isLoading ? (
+                  <button 
+                    onClick={stopGeneration}
+                    className="w-full h-full flex items-center justify-center bg-red-600 text-white rounded-full shadow-2xl active:scale-90 transition-all"
+                  >
+                    <div className="w-3.5 h-3.5 bg-white rounded-sm"></div>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleSendMessage}
+                    className="w-full h-full flex items-center justify-center bg-white text-black disabled:opacity-10 active:scale-95 transition-all shadow-2xl rounded-full"
+                    disabled={(!input.trim() && !attachedFile)}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 

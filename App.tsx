@@ -4,7 +4,6 @@ import { Sidebar } from './components/Sidebar';
 import { ChatWindow } from './components/ChatWindow';
 import { SettingsModal } from './components/SettingsModal';
 import { ChatSession, Message, ModelType } from './types';
-import { v4 as uuidv4 } from 'uuid';
 
 const App: React.FC = () => {
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
@@ -12,7 +11,7 @@ const App: React.FC = () => {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [activeModel, setActiveModel] = useState<ModelType>(ModelType.PRO);
+  const [activeModel, setActiveModel] = useState<ModelType>(ModelType.FLASH);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -56,7 +55,7 @@ const App: React.FC = () => {
 
   const createNewChat = useCallback(() => {
     const newSession: ChatSession = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       title: 'New Mission',
       messages: [],
       updatedAt: Date.now(),
@@ -118,7 +117,6 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen w-full bg-black text-white overflow-hidden">
-      {/* Dynamic Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-600/5 blur-[120px] rounded-full"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/5 blur-[120px] rounded-full"></div>
