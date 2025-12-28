@@ -22,5 +22,8 @@ export enum ModelType {
   PRO = 'gemini-3-pro-preview',
   OPENAI = 'gpt-4o',
   GROQ = 'llama-3.1-70b-versatile',
-  DEEPSEEK = 'deepseek-v3'
+  DEEPSEEK = 'deepseek-v3',
+  YOUTUBE = 'youtube-recon-v3',
+  WEATHER = 'weather-satellite-v1',
+  EXA = 'exa-osint-neural'
 }

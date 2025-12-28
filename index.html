@@ -6,36 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Morrigan Operative</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --apple-bg: #000000;
-            --apple-card: rgba(28, 28, 30, 0.7);
-            --apple-accent: #ff3b30;
+            --morrigan-red: #ff3b30;
+            --morrigan-bg: #000000;
+            --morrigan-card: rgba(18, 18, 18, 0.7);
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
-            background-color: var(--apple-bg);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--morrigan-bg);
             color: #ffffff;
             overflow: hidden;
             -webkit-font-smoothing: antialiased;
         }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
         .glass {
-            background: rgba(20, 20, 20, 0.7);
-            backdrop-filter: saturate(180%) blur(20px);
-            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
+        
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        @keyframes subtle-pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
+        @keyframes glow-pulse {
+            0% { box-shadow: 0 0 5px rgba(255, 59, 48, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(255, 59, 48, 0.5); }
+            100% { box-shadow: 0 0 5px rgba(255, 59, 48, 0.2); }
         }
-        .voice-active {
-            animation: subtle-pulse 2s infinite ease-in-out;
-            box-shadow: 0 0 20px rgba(255, 59, 48, 0.4);
+        
+        .premium-glow {
+            animation: glow-pulse 3s infinite ease-in-out;
+        }
+
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        .safe-top { padding-top: env(safe-area-inset-top); }
+
+        /* Custom selection color */
+        ::selection {
+            background: rgba(255, 59, 48, 0.3);
+            color: white;
         }
     </style>
 <script type="importmap">
@@ -50,7 +63,7 @@
 }
 </script>
 </head>
-<body class="safe-area-inset">
+<body class="safe-top safe-bottom">
     <div id="root"></div>
 </body>
 </html>

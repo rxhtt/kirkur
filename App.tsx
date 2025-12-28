@@ -16,12 +16,10 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      // Check if user has already selected a key
       if (window.aistudio && typeof window.aistudio.hasSelectedApiKey === 'function') {
         const hasKey = await window.aistudio.hasSelectedApiKey();
         setIsAuthorized(hasKey);
       } else {
-        // Fallback for environments without the aistudio global
         setIsAuthorized(true);
       }
     };
@@ -52,7 +50,6 @@ const App: React.FC = () => {
   const handleAuthorize = async () => {
     if (window.aistudio && typeof window.aistudio.openSelectKey === 'function') {
       await window.aistudio.openSelectKey();
-      // Per instructions: assume success after triggering the dialog to avoid race conditions
       setIsAuthorized(true);
     }
   };
@@ -60,7 +57,7 @@ const App: React.FC = () => {
   const createNewChat = useCallback(() => {
     const newSession: ChatSession = {
       id: uuidv4(),
-      title: 'New Chat',
+      title: 'New Mission',
       messages: [],
       updatedAt: Date.now(),
     };
@@ -88,8 +85,8 @@ const App: React.FC = () => {
     setSessions(prev => prev.map(s => {
       if (s.id === id) {
         let title = s.title;
-        if (title === 'New Chat' && messages.length > 0) {
-          title = messages[0].content.slice(0, 40);
+        if ((title === 'New Mission' || title === 'New Chat') && messages.length > 0) {
+          title = messages[messages.length - 1].content.slice(0, 30);
         }
         return { ...s, messages, title, updatedAt: Date.now() };
       }
@@ -99,21 +96,19 @@ const App: React.FC = () => {
 
   if (isAuthorized === false) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-[#050505] text-white p-6 text-center">
-        <div className="w-24 h-24 bg-gradient-to-br from-red-600 to-black rounded-3xl flex items-center justify-center shadow-2xl shadow-red-600/40 mb-8 border border-red-500/30">
+      <div className="flex flex-col items-center justify-center h-screen bg-black text-white p-10 text-center">
+        <div className="w-24 h-24 bg-gradient-to-tr from-red-600 to-red-400 rounded-[2.5rem] flex items-center justify-center shadow-[0_0_50px_rgba(239,68,68,0.4)] mb-12 rotate-3 premium-glow">
           <span className="text-5xl font-black italic">M</span>
         </div>
-        <h1 className="text-3xl font-black tracking-tighter mb-4 uppercase">Identity Verification Required</h1>
-        <p className="text-gray-400 max-w-md mb-8 leading-relaxed font-mono text-xs uppercase tracking-widest">
-          To access the Morrigan Operative kernel, you must authorize via a valid Gemini API Key from a paid GCP project.
-          <br/><br/>
-          <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" className="text-red-500 underline">Review Billing Docs</a>
+        <h1 className="text-4xl font-black tracking-tighter mb-4 uppercase italic">Unauthorized</h1>
+        <p className="text-gray-500 max-w-sm mb-12 leading-relaxed font-semibold text-[11px] uppercase tracking-[0.3em]">
+          Uplink restricted. Provide API clearance to synchronize with the Morrigan Kernel.
         </p>
         <button 
           onClick={handleAuthorize}
-          className="px-12 py-5 bg-red-600 text-white font-black rounded-2xl hover:bg-red-500 transition-all shadow-xl shadow-red-600/20 uppercase tracking-[0.3em] text-xs"
+          className="px-14 py-6 bg-white text-black font-black rounded-3xl hover:scale-105 active:scale-95 transition-all shadow-2xl uppercase tracking-[0.5em] text-[10px]"
         >
-          Grant Access
+          Initialize Sync
         </button>
       </div>
     );
@@ -122,9 +117,15 @@ const App: React.FC = () => {
   const currentSession = sessions.find(s => s.id === currentSessionId) || null;
 
   return (
-    <div className="flex h-screen w-full bg-[#111] text-[#ececec] overflow-hidden selection:bg-red-500/30">
+    <div className="flex h-screen w-full bg-black text-white overflow-hidden">
+      {/* Dynamic Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-600/5 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/5 blur-[120px] rounded-full"></div>
+      </div>
+
       {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black/60 z-40 md:hidden animate-in fade-in duration-200" onClick={() => setIsSidebarOpen(false)} />
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] md:hidden animate-in fade-in duration-300" onClick={() => setIsSidebarOpen(false)} />
       )}
 
       <Sidebar 
@@ -137,50 +138,59 @@ const App: React.FC = () => {
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 relative">
-        <header className="h-14 flex items-center justify-between px-4 bg-[#111]/80 backdrop-blur-md border-b border-red-500/10 shrink-0 z-20">
-          <div className="flex items-center gap-2">
-            <button onClick={() => setIsSidebarOpen(true)} className="p-2 hover:bg-white/5 rounded-lg md:hidden">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <main className="flex-1 flex flex-col min-w-0 relative z-10">
+        <header className="h-20 flex items-center justify-between px-6 bg-black/40 backdrop-blur-2xl border-b border-white/5 shrink-0">
+          <div className="flex items-center gap-6">
+            <button onClick={() => setIsSidebarOpen(true)} className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl md:hidden transition-all">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
-            <div className="flex items-center gap-2 px-3 py-1 bg-red-600/10 rounded-full cursor-pointer hover:bg-red-600/20 transition-all border border-red-600/20">
-              <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">MORRIGAN LIVE</span>
-              <div className="flex gap-1">
-                <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-                <div className="w-1.5 h-1.5 bg-white/20 rounded-full"></div>
-              </div>
+            <div className="hidden md:flex flex-col">
+              <h2 className="text-[10px] font-black text-red-500 uppercase tracking-[0.4em]">Active Mission</h2>
+              <p className="text-xs font-bold text-gray-400 truncate max-w-[200px]">{currentSession?.title || 'System Standby'}</p>
             </div>
           </div>
           
-          <button onClick={createNewChat} className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
+          <div className="flex items-center gap-3">
+             <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/5 rounded-2xl border border-white/5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Uplink: Secure</span>
+             </div>
+             <button onClick={createNewChat} className="p-3 bg-white text-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+             </button>
+          </div>
         </header>
 
-        {currentSessionId ? (
-          <ChatWindow 
-            session={currentSession!}
-            onUpdateMessages={(messages) => updateSessionMessages(currentSessionId, messages)}
-            activeModel={activeModel}
-            onModelChange={setActiveModel}
-          />
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-             <div className="relative mb-8">
-               <div className="w-24 h-24 bg-gradient-to-br from-red-600 to-black rounded-3xl flex items-center justify-center shadow-2xl shadow-red-600/20 rotate-6 transform hover:rotate-0 transition-transform ring-1 ring-red-500/40">
-                <span className="text-5xl font-black text-white italic">M</span>
-              </div>
+        <div className="flex-1 relative overflow-hidden">
+          {currentSessionId ? (
+            <ChatWindow 
+              session={currentSession!}
+              onUpdateMessages={(messages) => updateSessionMessages(currentSessionId, messages)}
+              activeModel={activeModel}
+              onModelChange={setActiveModel}
+            />
+          ) : (
+            <div className="flex-1 h-full flex flex-col items-center justify-center p-8 text-center animate-in fade-in slide-in-from-bottom-8 duration-1000">
+               <div className="relative group cursor-pointer mb-12" onClick={createNewChat}>
+                 <div className="absolute inset-0 bg-red-600 blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                 <div className="w-32 h-32 bg-gradient-to-tr from-red-600 to-black rounded-[3rem] flex items-center justify-center shadow-4xl rotate-3 transform group-hover:rotate-0 transition-all duration-700 ring-1 ring-red-500/20 relative z-10 premium-glow">
+                   <span className="text-6xl font-black text-white italic drop-shadow-2xl">M</span>
+                 </div>
+               </div>
+               <h1 className="text-5xl font-black tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-500 uppercase italic">Morrigan Operative</h1>
+               <p className="text-gray-500 max-w-sm mb-12 leading-relaxed font-bold text-[10px] uppercase tracking-[0.5em] opacity-40">
+                 The world is but a series of broken gates. Let us find the keys.
+               </p>
+               <button 
+                onClick={createNewChat} 
+                className="px-12 py-6 bg-white/5 border border-white/10 text-white font-black rounded-[2rem] hover:bg-white hover:text-black transition-all hover:scale-110 active:scale-95 shadow-2xl uppercase tracking-[0.5em] text-[10px]"
+               >
+                 Initialize Mission
+               </button>
             </div>
-            <h1 className="text-4xl font-black tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-white uppercase">Morrigan Operative</h1>
-            <p className="text-gray-500 max-w-sm mb-10 leading-relaxed font-mono text-xs uppercase tracking-[0.2em]">
-              High-fidelity visual synthesis. Neural grounding. Infinite memory.
-            </p>
-            <button onClick={createNewChat} className="px-10 py-5 bg-red-600 text-white font-black rounded-2xl hover:bg-red-500 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-red-600/20 uppercase tracking-widest text-xs">
-              Initiate Operation
-            </button>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </main>
 
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
