@@ -1,0 +1,9 @@
+{
+  "name": "Gemini Elite - ChatGPT Replica",
+  "description": "A high-performance, mobile-first ChatGPT replica powered by the Gemini 3 Pro engine, featuring full markdown support, code highlighting, and persistent chat history.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
